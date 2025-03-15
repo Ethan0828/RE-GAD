@@ -11,41 +11,9 @@ import numpy as np
 import pandas as pd
 import itertools
 import psutil, os
-# from catboost import Pool, CatBoostClassifier, CatBoostRegressor, sum_models
 
 
-def uncertainty_based_weighting(score1, score2):
-    """
-    基于不确定性的自适应权重
-    
-    参数:
-    score1: 第一种方法的异常得分
-    score2: 第二种方法的异常得分
-    
-    返回:
-    combined_scores: 组合后的异常得分
-    weights: 每个节点的权重(第一种方法的权重)
-    """
-    # 归一化得分
-    score1_norm = (score1 - np.min(score1)) / (np.max(score1) - np.min(score1) + 1e-10)
-    score2_norm = (score2 - np.min(score2)) / (np.max(score2) - np.min(score2) + 1e-10)
-    
-    # 计算不确定性 - 基于到0.5的距离
-    # 如果得分接近0.5，说明不确定性高
-    uncertainty1 = 1 - 2 * np.abs(score1_norm - np.mean(score1_norm) + 1e-10)
-    uncertainty2 = 1 - 2 * np.abs(score2_norm - np.mean(score2_norm) + 1e-10)
-    
-    # 计算权重 - 基于不确定性的反比
-    # 如果一个方法的不确定性高，则权重低
-    certainty1 = 1 - uncertainty1
-    certainty2 = 1 - uncertainty2
-    
-    alpha = certainty1 / (certainty1 + certainty2 + 1e-10)  # 避免除零
-    
-    # 组合得分
-    combined_scores = alpha * score1_norm + (1 - alpha) * score2_norm
-    
-    return combined_scores, alpha
+
 
 class BaseDetector(object):
     def __init__(self, train_config, model_config, data):
